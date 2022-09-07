@@ -7,7 +7,6 @@ const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false, // Vai ser carregado pelo lado do Browser, ssrc desligado
 });
 
-
 // estilizar o grafico
 const options: ApexOptions = {
   chart: {
