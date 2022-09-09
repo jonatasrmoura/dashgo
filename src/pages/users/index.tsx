@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Link from "next/link";
 import {
   Box,
@@ -22,22 +21,42 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Header, Pagination, Sidebar } from "../../components";
 
-export default function UserList() {
-  const { data, isLoading, error } = useQuery([`users`], async () => {
-    const response = await fetch(`http://localhost:3000/api/users`);
-    const data = await response.json();
+type UserProps = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
 
-    return data;
+type UserListProps = {
+  users: UserProps[];
+}
+
+export default function UserList() {
+  const { data, isLoading, error } = useQuery<UserProps[]>([`users`], async () => {
+    const response = await fetch(`http://localhost:3000/api/users`);
+    const data: UserListProps = await response.json();
+
+    const users: UserProps[] = data.users.map((user) => {
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: new Date(user.createdAt).toLocaleDateString(`pt-BR`, {
+          day: `2-digit`,
+          month: `long`,
+          year: `numeric`
+        }),
+      }
+    });
+
+    return users;
   });
 
   const isWideVersion = useBreakpointValue({
     base: false,
     lg: true,
   });
-
-  useEffect(() => {
-    
-  }, []);
 
   return (
     <Box>
@@ -87,34 +106,36 @@ export default function UserList() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  <Tr>
-                    <Td px={["4", "4", "6"]}>
-                      <Checkbox colorScheme="pink" />
-                    </Td>
-                    <Td>
-                      <Box>
-                        <Text fontWeight="bold">Jonatas Rosa Moura</Text>
-                        <Text fontSize="small" color="gray.300">
-                          jonatas.rmoura@outlook.com
-                        </Text>
-                      </Box>
-                    </Td>
-                    { isWideVersion && <Td>18 de Junho, 2022</Td> }
-                    <Td>
-                      <Button
-                        as="a" /* Ancora */
-                        maxW={85}
-                        maxH={32}
-                        display={[`none`, `flex`]}
-                        size="sm"
-                        fontSize="sm"
-                        colorScheme="purple"
-                        leftIcon={<Icon as={RiPencilLine} fontSize="16" />}
-                      >
-                        Editar
-                      </Button>
-                    </Td>
-                  </Tr>
+                  {data?.map((user) => (
+                    <Tr key={user.id}>
+                      <Td px={["4", "4", "6"]}>
+                        <Checkbox colorScheme="pink" />
+                      </Td>
+                      <Td>
+                        <Box>
+                          <Text fontWeight="bold">{user.name}</Text>
+                          <Text fontSize="small" color="gray.300">
+                            {user.email}
+                          </Text>
+                        </Box>
+                      </Td>
+                      { isWideVersion && <Td>{user.createdAt}</Td> }
+                      <Td>
+                        <Button
+                          as="a" /* Ancora */
+                          maxW={85}
+                          maxH={32}
+                          display={[`none`, `flex`]}
+                          size="sm"
+                          fontSize="sm"
+                          colorScheme="purple"
+                          leftIcon={<Icon as={RiPencilLine} fontSize="16" />}
+                        >
+                          Editar
+                        </Button>
+                      </Td>
+                    </Tr>
+                  ))}
                 </Tbody>
               </Table>
 
